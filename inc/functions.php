@@ -46,7 +46,9 @@ function upload_cedarcrest_data() {
     foreach($row as $col) {
       $key = $headers[$colCount];
       if ($key === 'flavor') {
-       $args['post_title'] = $col;
+        $args['post_title'] = $col;
+      } else if ($key === 'product_description') {
+        $short_desc = $col;
       } else if (strpos($key, 'category--') !== false) {
         if ( $col === 'x' ) {
           $cats[] = str_replace('category--', '', $key);
@@ -68,6 +70,12 @@ function upload_cedarcrest_data() {
       $catSlugs[] = strtolower(preg_replace('/\s+/', '_', $cat));
     }
     wp_set_object_terms($newPostId, $catSlugs, 'product_cat', true);
+    // short description
+    if ($short_desc !== '') {
+        $product    = wc_get_product( $newPostId );
+        $product->set_short_description( $short_desc );
+        $product->save();
+    }
     $count++;
   }
   fclose($file);
